@@ -1,0 +1,16 @@
+{
+  "network": "polygon",
+  "chainId": 137,
+  "deployedAt": "2026-02-01T02:31:47.224Z",
+  "deployer": "0xd462cc45b06Ae45daCd93F7B3979758C7b4a2cc0",
+  "contracts": {
+    "PolysealReceiptRules": "0xC0673Afc78973D5553651a67710e7629174636d4",
+    "PolysealRootBook": "0x6a0c0BB430ff1a419AC52Aaffc1c5450809c9f31",
+    "PolysealFeeManager": "0xb25ab2D19b7F5949C8079F2a142bc8c7400048E5",
+    "PolysealEscrow": "0xCDEd32Db822d392Be8566Cc010Fcd0F6Cdd1ACe4"
+  },
+  "tokens": {
+    "USDC": "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359",
+    "USDC.e": "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174"
+  }
+}

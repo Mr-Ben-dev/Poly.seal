@@ -1,0 +1,67 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+dist/
+build/
+out/
+coverage/
+typechain-types/
+cache/
+artifacts/
+
+# Environment files (SENSITIVE - NEVER COMMIT!)
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+contracts/.env
+frontend/.env
+
+# Private keys and secrets (CRITICAL!)
+*.pem
+*.key
+private/
+secrets/
+*.secret
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Testing
+coverage/
+.nyc_output/
+
+# Hardhat
+cache/
+artifacts/
+typechain/
+typechain-types/
+contracts/cache/
+contracts/artifacts/
+contracts/typechain-types/
+
+# Vercel
+.vercel
+
+# Misc
+*.tsbuildinfo
+.turbo
+.eslintcache

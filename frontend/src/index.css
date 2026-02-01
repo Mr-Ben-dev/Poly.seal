@@ -1,0 +1,259 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 250 250 250;
+    --foreground: 9 9 11;
+    --card: 255 255 255;
+    --card-foreground: 9 9 11;
+    --primary: 90 110 242;
+    --primary-foreground: 255 255 255;
+    --accent: 20 184 166;
+    --accent-foreground: 255 255 255;
+    --muted: 244 244 245;
+    --muted-foreground: 113 113 122;
+    --border: 228 228 231;
+  }
+
+  .dark {
+    --background: 9 9 11;
+    --foreground: 250 250 250;
+    --card: 24 24 27;
+    --card-foreground: 250 250 250;
+    --primary: 90 110 242;
+    --primary-foreground: 255 255 255;
+    --accent: 20 184 166;
+    --accent-foreground: 255 255 255;
+    --muted: 39 39 42;
+    --muted-foreground: 161 161 170;
+    --border: 63 63 70;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-surface-200 dark:border-surface-700;
+  }
+  
+  html {
+    @apply scroll-smooth;
+  }
+  
+  body {
+    @apply bg-surface-50 text-surface-900 font-body;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  
+  .dark body {
+    @apply bg-surface-950 text-surface-50;
+  }
+}
+
+@layer components {
+  /* Glass card component */
+  .glass-card {
+    @apply relative overflow-hidden rounded-2xl;
+    @apply bg-white/70 dark:bg-surface-900/70;
+    @apply backdrop-blur-xl;
+    @apply border border-white/20 dark:border-white/10;
+    @apply shadow-glass;
+  }
+  
+  .glass-card-hover {
+    @apply glass-card transition-all duration-300;
+    @apply hover:shadow-glass-lg hover:border-white/30 dark:hover:border-white/20;
+    @apply hover:-translate-y-1;
+  }
+  
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary-500 via-primary-400 to-accent-500;
+    @apply bg-clip-text text-transparent;
+  }
+  
+  /* Glowing button */
+  .btn-glow {
+    @apply relative px-6 py-3 rounded-xl font-semibold;
+    @apply bg-gradient-to-r from-primary-600 to-primary-500;
+    @apply text-white shadow-glow;
+    @apply transition-all duration-300;
+    @apply hover:shadow-glow hover:scale-105;
+    @apply active:scale-95;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100;
+  }
+  
+  .btn-glow::before {
+    content: '';
+    @apply absolute inset-0 rounded-xl;
+    @apply bg-gradient-to-r from-primary-400 to-accent-400;
+    @apply opacity-0 transition-opacity duration-300;
+    z-index: -1;
+  }
+  
+  .btn-glow:hover::before {
+    @apply opacity-100;
+  }
+  
+  /* Secondary button */
+  .btn-secondary {
+    @apply px-6 py-3 rounded-xl font-semibold;
+    @apply bg-surface-100 dark:bg-surface-800;
+    @apply text-surface-700 dark:text-surface-200;
+    @apply border border-surface-200 dark:border-surface-700;
+    @apply transition-all duration-300;
+    @apply hover:bg-surface-200 dark:hover:bg-surface-700;
+    @apply active:scale-95;
+  }
+  
+  /* Primary button */
+  .btn-primary {
+    @apply px-6 py-3 rounded-xl font-semibold;
+    @apply bg-gradient-to-r from-primary-600 to-primary-500;
+    @apply text-white shadow-lg;
+    @apply transition-all duration-300;
+    @apply hover:shadow-xl hover:from-primary-500 hover:to-primary-400;
+    @apply hover:-translate-y-0.5;
+    @apply active:scale-95;
+  }
+  
+  /* Ghost button */
+  .btn-ghost {
+    @apply px-4 py-2 rounded-lg font-medium;
+    @apply text-surface-600 dark:text-surface-400;
+    @apply transition-all duration-200;
+    @apply hover:bg-surface-100 dark:hover:bg-surface-800;
+    @apply hover:text-surface-900 dark:hover:text-surface-100;
+  }
+  
+  /* Input styles */
+  .input-glass {
+    @apply w-full px-4 py-3 rounded-xl;
+    @apply bg-white/50 dark:bg-surface-800/50;
+    @apply backdrop-blur-sm;
+    @apply border border-surface-200 dark:border-surface-700;
+    @apply text-surface-900 dark:text-surface-100;
+    @apply placeholder:text-surface-400 dark:placeholder:text-surface-500;
+    @apply transition-all duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-primary-500/50;
+    @apply focus:border-primary-500;
+  }
+  
+  /* Badge styles */
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full;
+    @apply text-xs font-medium;
+  }
+  
+  .badge-success {
+    @apply badge bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400;
+  }
+  
+  .badge-warning {
+    @apply badge bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400;
+  }
+  
+  .badge-error {
+    @apply badge bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400;
+  }
+  
+  .badge-info {
+    @apply badge bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400;
+  }
+  
+  /* Skeleton loading */
+  .skeleton {
+    @apply animate-pulse bg-surface-200 dark:bg-surface-700 rounded;
+  }
+  
+  /* Mesh background */
+  .mesh-background {
+    @apply fixed inset-0 -z-10;
+    @apply bg-gradient-mesh;
+    @apply dark:opacity-50;
+  }
+  
+  /* Page container */
+  .page-container {
+    @apply min-h-screen;
+    @apply px-4 sm:px-6 lg:px-8;
+    @apply py-8 sm:py-12;
+    @apply max-w-7xl mx-auto;
+  }
+  
+  /* Section heading */
+  .section-heading {
+    @apply font-display text-3xl sm:text-4xl font-bold;
+    @apply text-surface-900 dark:text-surface-50;
+    @apply mb-4;
+  }
+  
+  /* Card grid */
+  .card-grid {
+    @apply grid gap-6;
+    @apply grid-cols-1 sm:grid-cols-2 lg:grid-cols-3;
+  }
+}
+
+@layer utilities {
+  /* Hide scrollbar */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  /* Text balance */
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  /* Gradient border */
+  .gradient-border {
+    @apply relative;
+  }
+  
+  .gradient-border::before {
+    content: '';
+    @apply absolute -inset-[1px] rounded-[inherit];
+    @apply bg-gradient-to-r from-primary-500 to-accent-500;
+    @apply -z-10;
+  }
+}
+
+/* Custom scrollbar for dark mode */
+.dark ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.dark ::-webkit-scrollbar-track {
+  @apply bg-surface-900;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  @apply bg-surface-700 rounded-full;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  @apply bg-surface-600;
+}
+
+/* Animations */
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-shift 8s ease infinite;
+}
