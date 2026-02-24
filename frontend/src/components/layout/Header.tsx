@@ -13,6 +13,8 @@ import {
   Upload,
   ShieldCheck,
   Lock,
+  Bot,
+  Landmark,
   Settings,
   HelpCircle,
 } from 'lucide-react';
@@ -24,6 +26,8 @@ const navItems = [
   { path: '/commit', label: 'Commit', icon: Upload },
   { path: '/verify', label: 'Verify', icon: ShieldCheck },
   { path: '/escrow', label: 'Escrow', icon: Lock },
+  { path: '/agent', label: 'Agent', icon: Bot },
+  { path: '/vault', label: 'Vault', icon: Landmark },
   { path: '/settings', label: 'Settings', icon: Settings },
   { path: '/docs', label: 'Help', icon: HelpCircle },
 ];

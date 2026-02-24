@@ -10,6 +10,8 @@ import {
   FileText,
   Users,
   Globe,
+  Bot,
+  Landmark,
 } from 'lucide-react';
 import { Button } from '@/components/ui';
 
@@ -28,6 +30,16 @@ const features = [
     icon: Lock,
     title: 'Escrow Protection',
     description: 'Optional USDC escrow with dispute resolution for secure commerce.',
+  },
+  {
+    icon: Bot,
+    title: 'AI Settlement Agent',
+    description: 'Auto-settle escrows with configurable rules — time, amount, or reputation-based automation.',
+  },
+  {
+    icon: Landmark,
+    title: 'USDC Yield Vault',
+    description: 'Deposit USDC, earn yield through ERC4626-inspired share-based accounting.',
   },
   {
     icon: FileText,

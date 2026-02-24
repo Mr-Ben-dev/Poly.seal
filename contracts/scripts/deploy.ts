@@ -52,9 +52,29 @@ async function main() {
   console.log("   ✅ PolysealEscrow deployed to:", escrowAddress);
   console.log("   ⚖️  Initial arbiter:", arbiter);
 
+  // ============ Deploy PolysealAgent ============
+  console.log("\n5️⃣  Deploying PolysealAgent...");
+  const Agent = await ethers.getContractFactory("PolysealAgent");
+  const agent = await Agent.deploy(escrowAddress);
+  await agent.waitForDeployment();
+  const agentAddress = await agent.getAddress();
+  console.log("   ✅ PolysealAgent deployed to:", agentAddress);
+  console.log("   🔗 Linked to escrow:", escrowAddress);
+
+  // ============ Deploy PolysealVault ============
+  console.log("\n6️⃣  Deploying PolysealVault...");
+  const USDC_ADDRESS = "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359";
+  const Vault = await ethers.getContractFactory("PolysealVault");
+  const vault = await Vault.deploy(USDC_ADDRESS, deployer.address);
+  await vault.waitForDeployment();
+  const vaultAddress = await vault.getAddress();
+  console.log("   ✅ PolysealVault deployed to:", vaultAddress);
+  console.log("   💰 USDC token:", USDC_ADDRESS);
+  console.log("   👤 Owner:", deployer.address);
+
   // ============ Summary ============
   console.log("\n================================================");
-  console.log("🎉 DEPLOYMENT COMPLETE!");
+  console.log("🎉 DEPLOYMENT COMPLETE — 6 CONTRACTS!");
   console.log("================================================\n");
 
   const contracts = {
@@ -67,6 +87,8 @@ async function main() {
       PolysealRootBook: rootBookAddress,
       PolysealFeeManager: feeManagerAddress,
       PolysealEscrow: escrowAddress,
+      PolysealAgent: agentAddress,
+      PolysealVault: vaultAddress,
     },
     tokens: {
       USDC: "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359",
@@ -98,6 +120,8 @@ async function main() {
   console.log(`npx hardhat verify --network polygon ${rootBookAddress}`);
   console.log(`npx hardhat verify --network polygon ${feeManagerAddress} ${initialFeeBps} ${feeRecipient} ${deployer.address}`);
   console.log(`npx hardhat verify --network polygon ${escrowAddress} ${feeManagerAddress} ${arbiter}`);
+  console.log(`npx hardhat verify --network polygon ${agentAddress} ${escrowAddress}`);
+  console.log(`npx hardhat verify --network polygon ${vaultAddress} ${USDC_ADDRESS} ${deployer.address}`);
 
   return contracts;
 }

@@ -35,6 +35,8 @@ export const CONTRACTS = {
   PolysealRootBook: contractsConfig.contracts.PolysealRootBook as `0x${string}`,
   PolysealFeeManager: contractsConfig.contracts.PolysealFeeManager as `0x${string}`,
   PolysealEscrow: contractsConfig.contracts.PolysealEscrow as `0x${string}`,
+  PolysealAgent: contractsConfig.contracts.PolysealAgent as `0x${string}`,
+  PolysealVault: contractsConfig.contracts.PolysealVault as `0x${string}`,
 } as const;
 
 // Dynamic environment ID

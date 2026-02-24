@@ -52,3 +52,37 @@ struct EscrowRecord {
     EscrowState state;          // Current state
     bool buyerApproved;         // Buyer approved release
 }
+
+// ============ Agent Types ============
+
+/// @notice Settlement rule types for PolysealAgent
+enum RuleType {
+    TimeBased,          // Auto-settle after X seconds from funding
+    AmountBased,        // Auto-settle for amounts below threshold
+    ReputationBased     // Auto-settle when merchant reputation >= threshold
+}
+
+/// @notice Settlement rule record
+struct SettlementRule {
+    RuleType ruleType;      // Type of auto-settlement rule
+    uint256 threshold;       // Threshold value (seconds, amount, or score)
+    bool active;             // Whether the rule is active
+    uint256 createdAt;       // When the rule was created
+}
+
+/// @notice Agent execution record
+struct ExecutionLog {
+    uint256 escrowId;       // Escrow that was settled
+    RuleType ruleType;      // Which rule triggered settlement
+    uint256 executedAt;     // Timestamp of execution
+    address executor;       // Who called execute
+}
+
+// ============ Vault Types ============
+
+/// @notice Vault depositor info
+struct VaultDepositor {
+    uint256 shares;         // Number of vault shares held
+    uint256 depositedAt;    // First deposit timestamp
+    uint256 lastActionAt;   // Last deposit/withdraw timestamp
+}

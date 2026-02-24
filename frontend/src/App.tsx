@@ -9,6 +9,8 @@ import {
   CommitBatchPage,
   VerifyPage,
   EscrowPage,
+  AgentPage,
+  VaultPage,
   SettingsPage,
   DocsPage,
 } from '@/pages';
@@ -25,6 +27,8 @@ export default function App() {
             <Route path="commit" element={<CommitBatchPage />} />
             <Route path="verify" element={<VerifyPage />} />
             <Route path="escrow" element={<EscrowPage />} />
+            <Route path="agent" element={<AgentPage />} />
+            <Route path="vault" element={<VaultPage />} />
             <Route path="settings" element={<SettingsPage />} />
             <Route path="docs" element={<DocsPage />} />
           </Route>

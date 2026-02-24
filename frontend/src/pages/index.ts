@@ -4,5 +4,7 @@ export { CreateBatchPage } from './CreateBatchPage';
 export { CommitBatchPage } from './CommitBatchPage';
 export { VerifyPage } from './VerifyPage';
 export { EscrowPage } from './EscrowPage';
+export { AgentPage } from './AgentPage';
+export { VaultPage } from './VaultPage';
 export { SettingsPage } from './SettingsPage';
 export { DocsPage } from './DocsPage';

@@ -33,7 +33,23 @@ error TimelockNotExpired(uint256 unlockTime);
 error NoPendingFeeChange();
 error InvalidFeeRecipient();
 
+// ============ Agent Errors ============
+error RuleAlreadyExists(uint256 escrowId, uint8 ruleType);
+error RuleNotMet(uint256 escrowId, uint8 ruleType);
+error RuleNotFound(uint256 escrowId);
+error InvalidRuleType();
+error EscrowNotSettleable(uint256 escrowId);
+error AgentNotAuthorized();
+
+// ============ Vault Errors ============
+error InsufficientShares(uint256 requested, uint256 available);
+error VaultEmpty();
+error DepositTooSmall(uint256 amount, uint256 minimum);
+error WithdrawCooldown(uint256 unlockTime);
+error VaultPaused();
+
 // ============ General Errors ============
 error Unauthorized();
 error ZeroAddress();
+error NotOwner();
 error ReentrantCall();

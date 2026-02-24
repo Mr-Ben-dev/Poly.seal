@@ -1,13 +1,15 @@
 {
   "network": "polygon",
   "chainId": 137,
-  "deployedAt": "2026-02-01T02:31:47.224Z",
-  "deployer": "0xd462cc45b06Ae45daCd93F7B3979758C7b4a2cc0",
+  "deployedAt": "2026-02-24T00:59:59.673Z",
+  "deployer": "0x72F5CC029b361B60F6986Ee2679B5Be8e0f34837",
   "contracts": {
-    "PolysealReceiptRules": "0xC0673Afc78973D5553651a67710e7629174636d4",
-    "PolysealRootBook": "0x6a0c0BB430ff1a419AC52Aaffc1c5450809c9f31",
-    "PolysealFeeManager": "0xb25ab2D19b7F5949C8079F2a142bc8c7400048E5",
-    "PolysealEscrow": "0xCDEd32Db822d392Be8566Cc010Fcd0F6Cdd1ACe4"
+    "PolysealReceiptRules": "0xA983eCc82565213388D002282FedF8E0B66aAeA5",
+    "PolysealRootBook": "0x2b9fad6f859904D6F99f202CB6Dc4F004B59C421",
+    "PolysealFeeManager": "0x241791ab13a61da738bd817ee9Fa7cfba2c763c3",
+    "PolysealEscrow": "0x138a9A82Cee3dfD6C0832a26406D25fc6a137842",
+    "PolysealAgent": "0x9eF6DA10e065004E23045180FD50b6da2857cdD1",
+    "PolysealVault": "0x8E0Ef52997FC9baEC59fE6c5CA6a0A7798a94b25"
   },
   "tokens": {
     "USDC": "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359",
