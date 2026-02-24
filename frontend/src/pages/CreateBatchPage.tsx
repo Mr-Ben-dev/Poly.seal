@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAccount } from 'wagmi';
 import { 
@@ -27,7 +27,9 @@ import { createReceiptFields, computeLeaf, Receipt, ReceiptJSON, BatchJSON } fro
 import { MerkleTree, generateBatchJSON } from '@/lib/merkle';
 import { downloadJSON, copyToClipboard, encodeForURL } from '@/lib/sharing';
 import { generateId, parseUSDC } from '@/lib/utils';
-import { TOKENS } from '@/config';
+import { TOKENS, CONTRACTS } from '@/config';
+import { PolysealRootBookABI } from '@/config/abis';
+import { publicClient } from '@/lib/viem';
 import { useNavigate } from 'react-router-dom';
 
 interface ReceiptInput {
@@ -59,6 +61,28 @@ export function CreateBatchPage() {
   const [copied, setCopied] = useState(false);
   const [copiedProofIdx, setCopiedProofIdx] = useState<number | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [batchId, setBatchId] = useState('1');
+
+  // Auto-fetch next available batchId
+  useEffect(() => {
+    if (!address) return;
+    (async () => {
+      try {
+        const batchIds = await publicClient.readContract({
+          address: CONTRACTS.PolysealRootBook,
+          abi: PolysealRootBookABI,
+          functionName: 'getMerchantBatchIds',
+          args: [address],
+        });
+        const next = batchIds.length > 0
+          ? BigInt(Math.max(...batchIds.map(id => Number(id)))) + 1n
+          : 1n;
+        setBatchId(next.toString());
+      } catch {
+        setBatchId('1');
+      }
+    })();
+  }, [address]);
 
   const addReceipt = () => {
     setReceipts(prev => [
@@ -125,7 +149,7 @@ export function CreateBatchPage() {
 
     const leaves = receiptObjects.map(r => r.leaf);
     const tree = new MerkleTree(leaves);
-    const json = generateBatchJSON(receiptObjects, tree, 0n, address);
+    const json = generateBatchJSON(receiptObjects, tree, BigInt(batchId || '1'), address);
 
     setBatchData({
       merkleRoot: tree.getRoot(),
@@ -228,19 +252,33 @@ export function CreateBatchPage() {
                 <CardDescription>Select the token used for all receipts in this batch</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="w-full">
-                  <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
-                    Payment Token
-                  </label>
-                  <select
-                    value={token}
-                    onChange={e => setToken(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl bg-white/50 dark:bg-surface-800/50 border border-surface-200 dark:border-surface-700 text-surface-900 dark:text-surface-100"
-                  >
-                    {tokenOptions.map(opt => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
-                    ))}
-                  </select>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
+                      Payment Token
+                    </label>
+                    <select
+                      value={token}
+                      onChange={e => setToken(e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl bg-white/50 dark:bg-surface-800/50 border border-surface-200 dark:border-surface-700 text-surface-900 dark:text-surface-100"
+                    >
+                      {tokenOptions.map(opt => (
+                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
+                      Batch ID
+                    </label>
+                    <Input
+                      type="number"
+                      min="1"
+                      value={batchId}
+                      onChange={e => setBatchId(e.target.value)}
+                      hint="Auto-detected next available ID"
+                    />
+                  </div>
                 </div>
               </CardContent>
             </Card>

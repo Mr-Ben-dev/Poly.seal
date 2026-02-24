@@ -110,7 +110,7 @@ export function VerifyPage() {
     setError(null);
 
     try {
-      if (!receiptData.proof || !receiptData.batchId) {
+      if (!receiptData.proof || receiptData.batchId == null || receiptData.batchId === undefined) {
         throw new Error('Missing proof or batch ID');
       }
 
