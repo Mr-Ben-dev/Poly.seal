@@ -10,30 +10,30 @@ import { parseGwei } from 'viem';
 // Reasonable gas limits per transaction type
 export const GAS_LIMITS = {
   // ERC20 operations
-  approve: 65_000n,
-  transfer: 65_000n,
+  approve: 80_000n,
+  transfer: 80_000n,
 
   // RootBook
   commitRoot: 350_000n,
 
   // Escrow
   createEscrow: 400_000n,
-  depositEscrow: 150_000n,
-  approveRelease: 100_000n,
-  claimEscrow: 200_000n,
-  openDispute: 100_000n,
-  cancelEscrow: 100_000n,
+  depositEscrow: 300_000n,
+  approveRelease: 200_000n,
+  claimEscrow: 350_000n,
+  openDispute: 200_000n,
+  cancelEscrow: 250_000n,
 
   // Agent
-  registerRule: 200_000n,
-  deactivateRule: 100_000n,
-  executeSettlement: 250_000n,
-  batchExecute: 500_000n,
+  registerRule: 350_000n,
+  deactivateRule: 150_000n,
+  executeSettlement: 500_000n,
+  batchExecute: 1_000_000n,
 
   // Vault
-  vaultDeposit: 200_000n,
-  vaultWithdraw: 200_000n,
-  distributeYield: 150_000n,
+  vaultDeposit: 350_000n,
+  vaultWithdraw: 350_000n,
+  distributeYield: 300_000n,
 } as const;
 
 /**
