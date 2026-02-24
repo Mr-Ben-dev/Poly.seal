@@ -63,19 +63,20 @@ export function VaultPage() {
   const [previewWithdrawAmount, setPreviewWithdrawAmount] = useState<bigint | null>(null);
 
   const { data: approveHash, writeContract: approveUSDC } = useWriteContract();
-  const { isLoading: isApproving } = useWaitForTransactionReceipt({ hash: approveHash });
+  const { isLoading: isApproving, isSuccess: isApproveSuccess } = useWaitForTransactionReceipt({ hash: approveHash });
 
   const { data: depositHash, writeContract: depositToVault } = useWriteContract();
-  const { isLoading: isDepositing } = useWaitForTransactionReceipt({ hash: depositHash });
+  const { isLoading: isDepositing, isSuccess: isDepositSuccess } = useWaitForTransactionReceipt({ hash: depositHash });
 
   const { data: withdrawHash, writeContract: withdrawFromVault } = useWriteContract();
-  const { isLoading: isWithdrawing } = useWaitForTransactionReceipt({ hash: withdrawHash });
+  const { isLoading: isWithdrawing, isSuccess: isWithdrawSuccess } = useWaitForTransactionReceipt({ hash: withdrawHash });
 
+  // Re-fetch ONLY after transactions are confirmed (not just submitted)
   useEffect(() => {
     if (isConnected && address) {
       fetchData();
     }
-  }, [isConnected, address, depositHash, withdrawHash, approveHash]);
+  }, [isConnected, address, isApproveSuccess, isDepositSuccess, isWithdrawSuccess]);
 
   useEffect(() => {
     if (depositAmount) {

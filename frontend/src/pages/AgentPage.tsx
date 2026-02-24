@@ -73,20 +73,64 @@ export function AgentPage() {
   const [checkEscrowId, setCheckEscrowId] = useState('');
   const [settleResult, setSettleResult] = useState<{ settleable: boolean; ruleType: number } | null>(null);
 
+  const [escrowAgentAddr, setEscrowAgentAddr] = useState<string | null>(null);
+  const [executeResult, setExecuteResult] = useState<'success' | 'failed' | null>(null);
+
   const { data: registerHash, writeContract: registerRule } = useWriteContract();
-  const { isLoading: isRegistering } = useWaitForTransactionReceipt({ hash: registerHash });
+  const { isLoading: isRegistering, isSuccess: isRegisterSuccess } = useWaitForTransactionReceipt({ hash: registerHash });
 
   const { data: executeHash, writeContract: executeSettlement } = useWriteContract();
-  const { isLoading: isExecuting } = useWaitForTransactionReceipt({ hash: executeHash });
+  const { isLoading: isExecuting, isSuccess: isExecuteSuccess } = useWaitForTransactionReceipt({ hash: executeHash });
 
   const { data: batchHash, writeContract: batchExecute } = useWriteContract();
-  const { isLoading: isBatching } = useWaitForTransactionReceipt({ hash: batchHash });
+  const { isLoading: isBatching, isSuccess: isBatchSuccess } = useWaitForTransactionReceipt({ hash: batchHash });
 
+  // Re-fetch after confirmed (not just submitted)
   useEffect(() => {
     if (isConnected && address) {
       fetchData();
     }
-  }, [isConnected, address, registerHash, executeHash, batchHash]);
+  }, [isConnected, address, isRegisterSuccess, isExecuteSuccess, isBatchSuccess]);
+
+  // Auto-check canSettle + escrow agent when executeEscrowId changes
+  useEffect(() => {
+    if (executeEscrowId) {
+      handleCheckSettle(executeEscrowId);
+      checkEscrowAgent(executeEscrowId);
+    } else {
+      setSettleResult(null);
+      setEscrowAgentAddr(null);
+    }
+  }, [executeEscrowId]);
+
+  // After execute tx confirmed, check whether it actually settled
+  useEffect(() => {
+    if (isExecuteSuccess && executeEscrowId) {
+      publicClient.readContract({
+        address: CONTRACTS.PolysealAgent,
+        abi: PolysealAgentABI,
+        functionName: 'canSettle',
+        args: [BigInt(executeEscrowId)],
+      }).then((r) => {
+        const [settleable] = r as [boolean, number];
+        // If still settleable, it means executeSettlement returned false
+        setExecuteResult(settleable ? 'failed' : 'success');
+      }).catch(() => setExecuteResult('success'));
+    }
+  }, [isExecuteSuccess]);
+
+  async function checkEscrowAgent(escrowId: string) {
+    try {
+      const agentAddr = await publicClient.readContract({
+        address: CONTRACTS.PolysealEscrow,
+        abi: [{"inputs":[],"name":"agent","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"}],
+        functionName: 'agent',
+      }) as string;
+      setEscrowAgentAddr(agentAddr);
+    } catch {
+      setEscrowAgentAddr(null);
+    }
+  }
 
   async function fetchData() {
     setLoading(true);
@@ -153,14 +197,15 @@ export function AgentPage() {
     }
   }
 
-  async function handleCheckSettle() {
-    if (!checkEscrowId) return;
+  async function handleCheckSettle(overrideId?: string) {
+    const id = overrideId ?? checkEscrowId;
+    if (!id) return;
     try {
       const result = await publicClient.readContract({
         address: CONTRACTS.PolysealAgent,
         abi: PolysealAgentABI,
         functionName: 'canSettle',
-        args: [BigInt(checkEscrowId)],
+        args: [BigInt(id)],
       });
       const [settleable, ruleType] = result as [boolean, number];
       setSettleResult({ settleable, ruleType });
@@ -399,16 +444,40 @@ export function AgentPage() {
                     type="number"
                     placeholder="Escrow ID"
                     value={executeEscrowId}
-                    onChange={(e) => setExecuteEscrowId(e.target.value)}
+                    onChange={(e) => { setExecuteEscrowId(e.target.value); setExecuteResult(null); }}
                     className="flex-1"
                   />
                   <Button
                     onClick={handleExecuteSettlement}
-                    disabled={isExecuting || !executeEscrowId}
+                    disabled={isExecuting || !executeEscrowId || settleResult?.settleable === false}
                   >
                     {isExecuting ? 'Executing...' : 'Execute'}
                   </Button>
                 </div>
+
+                {/* Agent config warning */}
+                {escrowAgentAddr && escrowAgentAddr.toLowerCase() !== CONTRACTS.PolysealAgent.toLowerCase() && (
+                  <div className="p-2 rounded-lg bg-red-500/10 border border-red-500/20 text-xs text-red-400">
+                    ⛔ Escrow agent is not set to PolysealAgent. Settlement will always fail.
+                    Current agent: <span className="font-mono">{escrowAgentAddr}</span>
+                  </div>
+                )}
+
+                {/* canSettle status (auto-checked) */}
+                {settleResult && executeEscrowId && (
+                  <div className={`p-2 rounded-lg text-xs border ${settleResult.settleable ? 'bg-green-500/10 border-green-500/20 text-green-400' : 'bg-orange-500/10 border-orange-500/20 text-orange-400'}`}>
+                    {settleResult.settleable
+                      ? `✅ Ready — ${RULE_TYPE_LABELS[settleResult.ruleType]} rule condition met`
+                      : '⚠️ Not settleable — no rule registered or condition not met yet'}
+                  </div>
+                )}
+
+                {/* Execute result */}
+                {executeResult && (
+                  <div className={`p-2 rounded-lg text-xs border ${executeResult === 'success' ? 'bg-green-500/10 border-green-500/20 text-green-400' : 'bg-red-500/10 border-red-500/20 text-red-400'}`}>
+                    {executeResult === 'success' ? '✅ Settlement executed — escrow released to merchant' : '❌ Transaction sent but settlement returned false — rule condition not met or escrow state invalid'}
+                  </div>
+                )}
               </div>
 
               {/* Batch Execute */}
