@@ -29,8 +29,8 @@ contract PolysealVault is ReentrancyGuard {
 
     // ============ Constants ============
 
-    /// @notice Minimum deposit: 1 USDC
-    uint256 public constant MIN_DEPOSIT = 1e6;
+    /// @notice Minimum deposit: 0.1 USDC
+    uint256 public constant MIN_DEPOSIT = 1e5;
 
     /// @notice Withdrawal cooldown: 1 hour after deposit
     uint256 public constant WITHDRAW_COOLDOWN = 1 hours;

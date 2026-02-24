@@ -113,9 +113,9 @@ All contracts are deployed on **Polygon Mainnet** (Chain ID: 137):
 | **PolysealRootBook** | `0x2b9fad6f859904D6F99f202CB6Dc4F004B59C421` | Main registry for Merkle root commitments |
 | **PolysealReceiptRules** | `0xA983eCc82565213388D002282FedF8E0B66aAeA5` | Receipt field validation & leaf computation |
 | **PolysealFeeManager** | `0x241791ab13a61da738bd817ee9Fa7cfba2c763c3` | Protocol fee configuration (0.5% default) |
-| **PolysealEscrow** | `0x138a9A82Cee3dfD6C0832a26406D25fc6a137842` | USDC escrow with dispute resolution |
-| **PolysealAgent** | `0x9eF6DA10e065004E23045180FD50b6da2857cdD1` | AI Settlement Agent — auto-settle escrows |
-| **PolysealVault** | `0x8E0Ef52997FC9baEC59fE6c5CA6a0A7798a94b25` | USDC Yield Vault — deposit & earn yield |
+| **PolysealEscrow** | `0x73ec4A218A232c19212AE04e6557bc2993FE6Ba8` | USDC escrow with dispute resolution |
+| **PolysealAgent** | `0x90C4CCF2BDCCeF6B02F9F8cdB759CFc1305438E6` | AI Settlement Agent — auto-settle escrows |
+| **PolysealVault** | `0xbA7d53Fdc258b1e4dE2E3130E2511FB2D8C4185C` | USDC Yield Vault — deposit & earn yield |
 
 ### Contract Details
 

@@ -301,7 +301,7 @@ export function VaultPage() {
               </div>
               <div className="text-center p-4 rounded-lg bg-primary/5">
                 <p className="text-xs text-muted-foreground mb-1">Total Shares</p>
-                <p className="text-2xl font-bold">{vaultStats ? Number(vaultStats.totalShares / (10n ** 12n)).toLocaleString() : '0'}</p>
+                <p className="text-2xl font-bold">{vaultStats ? (Number(vaultStats.totalShares) / 1e18).toFixed(2) : '0.00'}</p>
                 <p className="text-xs text-muted-foreground">Outstanding</p>
               </div>
               <div className="text-center p-4 rounded-lg bg-primary/5">
@@ -342,7 +342,7 @@ export function VaultPage() {
               <div className="p-4 rounded-lg bg-primary/5 border border-primary/10">
                 <p className="text-xs text-muted-foreground mb-1">Your Shares</p>
                 <p className="text-2xl font-bold text-primary">
-                  {depositorInfo ? Number(depositorInfo.shares / (10n ** 12n)).toLocaleString() : '0'}
+                  {depositorInfo ? (Number(depositorInfo.shares) / 1e18).toFixed(2) : '0.00'}
                 </p>
               </div>
               <div className="p-4 rounded-lg bg-primary/5 border border-primary/10">
@@ -382,13 +382,13 @@ export function VaultPage() {
                 <Input
                   type="number"
                   step="0.01"
-                  min="1"
+                  min="0.1"
                   placeholder="Enter amount to deposit"
                   value={depositAmount}
                   onChange={(e) => setDepositAmount(e.target.value)}
                 />
                 <div className="flex justify-between mt-1">
-                  <span className="text-xs text-muted-foreground">Min: 1 USDC</span>
+                  <span className="text-xs text-muted-foreground">Min: 0.1 USDC</span>
                   <button
                     onClick={() => setDepositAmount(formatUSDC(usdcBalance))}
                     className="text-xs text-primary hover:underline"
@@ -402,7 +402,7 @@ export function VaultPage() {
                 <div className="p-3 rounded-lg bg-primary/5 border border-primary/10">
                   <p className="text-xs text-muted-foreground">You will receive</p>
                   <p className="text-lg font-bold text-primary">
-                    {Number(previewShares / (10n ** 12n)).toLocaleString()} shares
+                    {(Number(previewShares) / 1e18).toFixed(2)} shares
                   </p>
                 </div>
               )}
@@ -458,7 +458,7 @@ export function VaultPage() {
                       onClick={() => setWithdrawShares(depositorInfo.shares.toString())}
                       className="text-xs text-primary hover:underline"
                     >
-                      Max: {Number(depositorInfo.shares / (10n ** 12n)).toLocaleString()} shares
+                      Max: {(Number(depositorInfo.shares) / 1e18).toFixed(2)} shares
                     </button>
                   )}
                 </div>
@@ -546,7 +546,7 @@ export function VaultPage() {
             <div>
               <p className="text-sm font-medium mb-1">Security Features</p>
               <p className="text-xs text-muted-foreground">
-                ReentrancyGuard protection • 1-hour withdrawal cooldown • Pausable by protocol admin • Minimum 1 USDC deposit • ERC4626-inspired share accounting
+                ReentrancyGuard protection • 1-hour withdrawal cooldown • Pausable by protocol admin • Minimum 0.1 USDC deposit • ERC4626-inspired share accounting
               </p>
             </div>
           </CardContent>

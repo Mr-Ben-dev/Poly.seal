@@ -34,6 +34,9 @@ contract PolysealEscrow is ReentrancyGuard {
     /// @notice Arbiter address for dispute resolution
     address public arbiter;
 
+    /// @notice Authorized agent contract for auto-settlement
+    address public agent;
+
     /// @notice Escrow ID counter
     uint256 public nextEscrowId;
 
@@ -102,6 +105,7 @@ contract PolysealEscrow is ReentrancyGuard {
     );
 
     event ArbiterUpdated(address oldArbiter, address newArbiter);
+    event AgentUpdated(address oldAgent, address newAgent);
 
     // ============ Constructor ============
 
@@ -207,7 +211,8 @@ contract PolysealEscrow is ReentrancyGuard {
         if (escrow.state != EscrowState.Funded) {
             revert InvalidEscrowState(escrowId, uint8(escrow.state), uint8(EscrowState.Funded));
         }
-        if (msg.sender != escrow.buyer) revert NotBuyer(escrowId, msg.sender);
+        // Allow buyer OR authorized agent to release
+        if (msg.sender != escrow.buyer && msg.sender != agent) revert NotBuyer(escrowId, msg.sender);
 
         escrow.buyerApproved = true;
         escrow.state = EscrowState.Released;
@@ -355,6 +360,17 @@ contract PolysealEscrow is ReentrancyGuard {
         arbiter = newArbiter;
         
         emit ArbiterUpdated(oldArbiter, newArbiter);
+    }
+
+    /**
+     * @notice Set authorized agent contract for auto-settlement
+     * @param _agent Agent contract address
+     */
+    function setAgent(address _agent) external {
+        if (msg.sender != arbiter) revert NotArbiter(msg.sender);
+        address oldAgent = agent;
+        agent = _agent;
+        emit AgentUpdated(oldAgent, _agent);
     }
 
     // ============ View Functions ============

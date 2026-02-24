@@ -242,6 +242,13 @@ contract PolysealAgent is ReentrancyGuard {
 
         if (!ruleMatched) return false;
 
+        // Actually release the escrow via the agent-authorized approveRelease
+        try escrow.approveRelease(escrowId) {
+            // success
+        } catch {
+            return false;
+        }
+
         // Settlement succeeded — log it
         totalSettled++;
         
