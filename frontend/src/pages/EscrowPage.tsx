@@ -151,6 +151,20 @@ export function EscrowPage() {
   const handleCreateEscrow = async () => {
     if (!address) return;
 
+    // Validate merchant address
+    if (!/^0x[a-fA-F0-9]{40}$/.test(createForm.merchant)) {
+      alert('Invalid merchant address. Must be a valid 42-character Ethereum address (0x + 40 hex chars).');
+      return;
+    }
+    if (createForm.merchant.toLowerCase() === address.toLowerCase()) {
+      alert('Merchant address cannot be the same as your own address.');
+      return;
+    }
+    if (!createForm.amount || parseFloat(createForm.amount) <= 0) {
+      alert('Amount must be greater than 0.');
+      return;
+    }
+
     const deliveryWindowSeconds = BigInt(parseInt(createForm.deliveryWindowDays) * 24 * 60 * 60);
     const invoiceHash = createForm.invoiceHash 
       ? (createForm.invoiceHash as `0x${string}`)
