@@ -17,7 +17,7 @@ export const GAS_LIMITS = {
   commitRoot: 350_000n,
 
   // Escrow
-  createEscrow: 250_000n,
+  createEscrow: 400_000n,
   depositEscrow: 150_000n,
   approveRelease: 100_000n,
   claimEscrow: 200_000n,
