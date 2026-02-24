@@ -327,6 +327,10 @@ export function AgentPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-xs text-yellow-400">
+                ⚠️ Must be connected as the <strong>merchant wallet</strong> of the escrow to register a rule.
+                Check the merchant address in Escrow → Details.
+              </div>
               <div>
                 <label className="text-sm text-muted-foreground mb-1 block">Escrow ID</label>
                 <Input
@@ -341,7 +345,7 @@ export function AgentPage() {
                 <select
                   value={registerForm.ruleType}
                   onChange={(e) => setRegisterForm(prev => ({ ...prev, ruleType: e.target.value }))}
-                  className="w-full rounded-lg bg-background border border-border px-3 py-2 text-sm"
+                  className="w-full px-4 py-3 rounded-xl bg-white/50 dark:bg-surface-800/50 border border-surface-200 dark:border-surface-700 text-surface-900 dark:text-surface-100 text-sm"
                 >
                   {RULE_TYPE_LABELS.map((label, i) => (
                     <option key={i} value={i}>{label}</option>

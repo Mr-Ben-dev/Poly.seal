@@ -520,7 +520,14 @@ export function EscrowPage() {
               </div>
               <div className="flex justify-between py-2 border-b border-surface-200 dark:border-surface-700">
                 <span className="text-surface-600 dark:text-surface-400">Merchant</span>
-                <code className="text-sm">{truncateHash(selectedEscrow.merchant)}</code>
+                <div className="flex items-center gap-2">
+                  <code className="text-xs break-all text-right max-w-[200px]">{selectedEscrow.merchant}</code>
+                  <button
+                    onClick={() => navigator.clipboard.writeText(selectedEscrow.merchant)}
+                    className="text-xs text-primary hover:underline shrink-0"
+                    title="Copy address"
+                  >Copy</button>
+                </div>
               </div>
               <div className="flex justify-between py-2 border-b border-surface-200 dark:border-surface-700">
                 <span className="text-surface-600 dark:text-surface-400">Buyer</span>
