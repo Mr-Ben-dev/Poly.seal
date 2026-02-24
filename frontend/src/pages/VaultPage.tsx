@@ -25,6 +25,7 @@ import { publicClient } from '@/lib/viem';
 import { formatUSDC, parseUSDC } from '@/lib/utils';
 import { CONTRACTS, TOKENS } from '@/config';
 import { PolysealVaultABI, ERC20ABI } from '@/config/abis';
+import { getGasConfig, GAS_LIMITS } from '@/lib/gas';
 
 interface VaultStats {
   totalAssets: bigint;
@@ -182,33 +183,39 @@ export function VaultPage() {
     }
   }
 
-  function handleApprove() {
+  async function handleApprove() {
     const amount = parseUSDC(depositAmount);
+    const gasConfig = await getGasConfig(GAS_LIMITS.approve);
     approveUSDC({
       address: TOKENS.USDC.address,
       abi: ERC20ABI,
       functionName: 'approve',
       args: [CONTRACTS.PolysealVault, amount],
+      ...gasConfig,
     });
   }
 
-  function handleDeposit() {
+  async function handleDeposit() {
     const amount = parseUSDC(depositAmount);
+    const gasConfig = await getGasConfig(GAS_LIMITS.vaultDeposit);
     depositToVault({
       address: CONTRACTS.PolysealVault,
       abi: PolysealVaultABI,
       functionName: 'deposit',
       args: [amount],
+      ...gasConfig,
     });
   }
 
-  function handleWithdraw() {
+  async function handleWithdraw() {
     if (!withdrawShares) return;
+    const gasConfig = await getGasConfig(GAS_LIMITS.vaultWithdraw);
     withdrawFromVault({
       address: CONTRACTS.PolysealVault,
       abi: PolysealVaultABI,
       functionName: 'withdraw',
       args: [BigInt(withdrawShares)],
+      ...gasConfig,
     });
   }
 

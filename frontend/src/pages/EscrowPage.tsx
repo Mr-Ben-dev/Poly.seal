@@ -22,6 +22,7 @@ import { publicClient } from '@/lib/viem';
 import { formatUSDC, parseUSDC, truncateHash } from '@/lib/utils';
 import { CONTRACTS, TOKENS } from '@/config';
 import { PolysealEscrowABI, ERC20ABI } from '@/config/abis';
+import { getGasConfig, GAS_LIMITS } from '@/lib/gas';
 
 interface EscrowRecord {
   escrowId: bigint;
@@ -136,6 +137,7 @@ export function EscrowPage() {
       ? (createForm.invoiceHash as `0x${string}`)
       : ('0x' + '0'.repeat(64)) as `0x${string}`;
 
+    const gasConfig = await getGasConfig(GAS_LIMITS.createEscrow);
     writeContract({
       address: CONTRACTS.PolysealEscrow,
       abi: PolysealEscrowABI,
@@ -147,6 +149,7 @@ export function EscrowPage() {
         deliveryWindowSeconds,
         invoiceHash,
       ],
+      ...gasConfig,
     });
   };
 
@@ -154,20 +157,24 @@ export function EscrowPage() {
     if (!address) return;
 
     // First approve, then deposit
+    const gasConfig = await getGasConfig(GAS_LIMITS.approve);
     writeContract({
       address: escrow.token,
       abi: ERC20ABI,
       functionName: 'approve',
       args: [CONTRACTS.PolysealEscrow, escrow.amount],
+      ...gasConfig,
     });
   };
 
   const handleReleaseEscrow = async (escrow: EscrowRecord) => {
+    const gasConfig = await getGasConfig(GAS_LIMITS.approveRelease);
     writeContract({
       address: CONTRACTS.PolysealEscrow,
       abi: PolysealEscrowABI,
       functionName: 'approveRelease',
       args: [escrow.escrowId],
+      ...gasConfig,
     });
   };
 

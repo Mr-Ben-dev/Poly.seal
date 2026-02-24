@@ -24,6 +24,7 @@ import { publicClient } from '@/lib/viem';
 import { CONTRACTS } from '@/config';
 import { PolysealAgentABI } from '@/config/abis';
 import { truncateHash } from '@/lib/utils';
+import { getGasConfig, GAS_LIMITS } from '@/lib/gas';
 
 const RULE_TYPE_LABELS = ['Time-Based', 'Amount-Based', 'Reputation-Based'];
 const RULE_TYPE_ICONS = [Clock, DollarSign, Trophy];
@@ -169,8 +170,9 @@ export function AgentPage() {
     }
   }
 
-  function handleRegisterRule() {
+  async function handleRegisterRule() {
     if (!registerForm.escrowId || !registerForm.threshold) return;
+    const gasConfig = await getGasConfig(GAS_LIMITS.registerRule);
     registerRule({
       address: CONTRACTS.PolysealAgent,
       abi: PolysealAgentABI,
@@ -180,28 +182,33 @@ export function AgentPage() {
         Number(registerForm.ruleType),
         BigInt(registerForm.threshold),
       ],
+      ...gasConfig,
     });
   }
 
-  function handleExecuteSettlement() {
+  async function handleExecuteSettlement() {
     if (!executeEscrowId) return;
+    const gasConfig = await getGasConfig(GAS_LIMITS.executeSettlement);
     executeSettlement({
       address: CONTRACTS.PolysealAgent,
       abi: PolysealAgentABI,
       functionName: 'executeSettlement',
       args: [BigInt(executeEscrowId)],
+      ...gasConfig,
     });
   }
 
-  function handleBatchExecute() {
+  async function handleBatchExecute() {
     if (!batchIds) return;
     const ids = batchIds.split(',').map(id => BigInt(id.trim())).filter(Boolean);
     if (ids.length === 0) return;
+    const gasConfig = await getGasConfig(GAS_LIMITS.batchExecute);
     batchExecute({
       address: CONTRACTS.PolysealAgent,
       abi: PolysealAgentABI,
       functionName: 'batchExecute',
       args: [ids],
+      ...gasConfig,
     });
   }
 

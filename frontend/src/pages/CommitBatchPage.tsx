@@ -26,6 +26,7 @@ import { truncateHash } from '@/lib/utils';
 import { CONTRACTS } from '@/config';
 import { PolysealRootBookABI } from '@/config/abis';
 import { publicClient } from '@/lib/viem';
+import { getGasConfig, GAS_LIMITS } from '@/lib/gas';
 
 interface BatchJSON {
   merkleRoot: string;
@@ -149,9 +150,10 @@ export function CommitBatchPage() {
     }
   };
 
-  const handleCommit = () => {
+  const handleCommit = async () => {
     if (!batchData || !address || !batchId) return;
 
+    const gasConfig = await getGasConfig(GAS_LIMITS.commitRoot);
     writeContract({
       address: CONTRACTS.PolysealRootBook,
       abi: PolysealRootBookABI,
@@ -162,6 +164,7 @@ export function CommitBatchPage() {
         batchURI || 'polyseal://batch',
         BigInt(batchData.receipts.length),
       ],
+      ...gasConfig,
     });
   };
 

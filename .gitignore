@@ -65,3 +65,4 @@ contracts/typechain-types/
 *.tsbuildinfo
 .turbo
 .eslintcache
+ABOUT.md
