@@ -12,6 +12,7 @@ import {
   Download,
   Copy,
   Check,
+  Share2,
 } from 'lucide-react';
 import { 
   Button, 
@@ -22,9 +23,9 @@ import {
   CardDescription,
   Input,
 } from '@/components/ui';
-import { createReceiptFields, computeLeaf, Receipt } from '@/lib/receipt';
+import { createReceiptFields, computeLeaf, Receipt, ReceiptJSON, BatchJSON } from '@/lib/receipt';
 import { MerkleTree, generateBatchJSON } from '@/lib/merkle';
-import { downloadJSON, copyToClipboard } from '@/lib/sharing';
+import { downloadJSON, copyToClipboard, encodeForURL } from '@/lib/sharing';
 import { generateId, parseUSDC } from '@/lib/utils';
 import { TOKENS } from '@/config';
 import { useNavigate } from 'react-router-dom';
@@ -53,9 +54,10 @@ export function CreateBatchPage() {
   const [batchData, setBatchData] = useState<{
     merkleRoot: string;
     receipts: Receipt[];
-    json: object;
+    json: BatchJSON;
   } | null>(null);
   const [copied, setCopied] = useState(false);
+  const [copiedProofIdx, setCopiedProofIdx] = useState<number | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const addReceipt = () => {
@@ -150,6 +152,32 @@ export function CreateBatchPage() {
     if (!batchData) return;
     sessionStorage.setItem('polyseal-pending-batch', JSON.stringify(batchData.json));
     navigate('/commit');
+  };
+
+  const handleDownloadProof = (receiptJson: ReceiptJSON, index: number) => {
+    downloadJSON(receiptJson, `polyseal-proof-${index + 1}-${Date.now()}.json`);
+  };
+
+  const handleCopyVerifyLink = async (receiptJson: ReceiptJSON, index: number) => {
+    const proofData = {
+      merchant: receiptJson.receipt.merchant,
+      buyer: receiptJson.receipt.payer,
+      token: receiptJson.receipt.token,
+      amount: receiptJson.receipt.amount,
+      timestamp: receiptJson.receipt.issuedAt,
+      invoiceId: receiptJson.receipt.memo || receiptJson.receipt.invoiceHash.slice(0, 18),
+      reference: receiptJson.receipt.memo || '',
+      leaf: receiptJson.proof.leaf,
+      proof: receiptJson.proof.merkleProof,
+      batchId: parseInt(receiptJson.proof.batchId),
+    };
+    const encoded = encodeForURL(JSON.stringify(proofData));
+    const url = `${window.location.origin}/verify?data=${encoded}`;
+    const success = await copyToClipboard(url);
+    if (success) {
+      setCopiedProofIdx(index);
+      setTimeout(() => setCopiedProofIdx(null), 2000);
+    }
   };
 
   const totalAmount = receipts.reduce((acc, r) => {
@@ -364,6 +392,31 @@ export function CreateBatchPage() {
                       <Button className="w-full" onClick={handleProceedToCommit} icon={<ArrowRight className="w-4 h-4" />}>
                         Commit On-Chain
                       </Button>
+                    </div>
+
+                    {/* Per-receipt proof sharing */}
+                    <div className="border-t border-surface-200 dark:border-surface-700 pt-4 mt-4">
+                      <p className="text-sm font-semibold text-surface-900 dark:text-surface-50 mb-3 flex items-center gap-2">
+                        <Share2 className="w-4 h-4 text-primary-500" />
+                        Share Proofs with Buyers
+                      </p>
+                      <div className="space-y-2">
+                        {batchData.json.receipts.map((r, i) => (
+                          <div key={i} className="flex items-center justify-between p-2 bg-surface-50 dark:bg-surface-800/50 rounded-lg">
+                            <span className="text-xs text-surface-700 dark:text-surface-300">
+                              Receipt #{i + 1}
+                            </span>
+                            <div className="flex gap-1">
+                              <Button variant="ghost" size="sm" onClick={() => handleDownloadProof(r, i)} title="Download proof JSON">
+                                <Download className="w-3 h-3" />
+                              </Button>
+                              <Button variant="ghost" size="sm" onClick={() => handleCopyVerifyLink(r, i)} title="Copy verification link">
+                                {copiedProofIdx === i ? <Check className="w-3 h-3 text-green-500" /> : <Share2 className="w-3 h-3" />}
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </CardContent>
                 </Card>

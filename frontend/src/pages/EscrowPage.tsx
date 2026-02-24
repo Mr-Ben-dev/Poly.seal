@@ -37,8 +37,9 @@ interface EscrowRecord {
   buyerApproved: boolean;
 }
 
-const STATE_LABELS = ['Created', 'Funded', 'Released', 'Disputed', 'Refunded'];
-const STATE_COLORS = ['yellow', 'blue', 'green', 'red', 'gray'];
+// Must match Solidity enum: None=0, Created=1, Funded=2, Released=3, Claimed=4, Disputed=5, Resolved=6
+const STATE_LABELS = ['None', 'Created', 'Funded', 'Released', 'Claimed', 'Disputed', 'Resolved'];
+const STATE_COLORS = ['gray', 'yellow', 'blue', 'green', 'green', 'red', 'gray'];
 
 const tokenOptions = [
   { value: TOKENS.USDC.address, label: 'USDC' },
@@ -52,6 +53,7 @@ export function EscrowPage() {
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedEscrow, setSelectedEscrow] = useState<EscrowRecord | null>(null);
+  const [pendingDeposit, setPendingDeposit] = useState<EscrowRecord | null>(null);
 
   // Create escrow form
   const [createForm, setCreateForm] = useState({
@@ -86,10 +88,27 @@ export function EscrowPage() {
   // Refresh after tx confirms
   useEffect(() => {
     if (isConfirmed) {
-      fetchEscrows();
-      setShowCreateModal(false);
-      setSelectedEscrow(null);
-      resetWrite();
+      if (pendingDeposit) {
+        // Approve just went through, now call deposit on the escrow
+        const doDeposit = async () => {
+          resetWrite();
+          const gasConfig = await getGasConfig(GAS_LIMITS.depositEscrow);
+          writeContract({
+            address: CONTRACTS.PolysealEscrow,
+            abi: PolysealEscrowABI,
+            functionName: 'deposit',
+            args: [pendingDeposit.escrowId],
+            ...gasConfig,
+          });
+          setPendingDeposit(null);
+        };
+        doDeposit();
+      } else {
+        fetchEscrows();
+        setShowCreateModal(false);
+        setSelectedEscrow(null);
+        resetWrite();
+      }
     }
   }, [isConfirmed]);
 
@@ -156,15 +175,49 @@ export function EscrowPage() {
   const handleFundEscrow = async (escrow: EscrowRecord) => {
     if (!address) return;
 
-    // First approve, then deposit
-    const gasConfig = await getGasConfig(GAS_LIMITS.approve);
-    writeContract({
-      address: escrow.token,
-      abi: ERC20ABI,
-      functionName: 'approve',
-      args: [CONTRACTS.PolysealEscrow, escrow.amount],
-      ...gasConfig,
-    });
+    // Check if already approved
+    try {
+      const allowance = await publicClient.readContract({
+        address: escrow.token,
+        abi: ERC20ABI,
+        functionName: 'allowance',
+        args: [address, CONTRACTS.PolysealEscrow],
+      }) as bigint;
+
+      if (allowance >= escrow.amount) {
+        // Already approved, deposit directly
+        const gasConfig = await getGasConfig(GAS_LIMITS.depositEscrow);
+        writeContract({
+          address: CONTRACTS.PolysealEscrow,
+          abi: PolysealEscrowABI,
+          functionName: 'deposit',
+          args: [escrow.escrowId],
+          ...gasConfig,
+        });
+      } else {
+        // Need to approve first, then auto-deposit after confirm
+        setPendingDeposit(escrow);
+        const gasConfig = await getGasConfig(GAS_LIMITS.approve);
+        writeContract({
+          address: escrow.token,
+          abi: ERC20ABI,
+          functionName: 'approve',
+          args: [CONTRACTS.PolysealEscrow, escrow.amount],
+          ...gasConfig,
+        });
+      }
+    } catch {
+      // Fallback: just approve
+      setPendingDeposit(escrow);
+      const gasConfig = await getGasConfig(GAS_LIMITS.approve);
+      writeContract({
+        address: escrow.token,
+        abi: ERC20ABI,
+        functionName: 'approve',
+        args: [CONTRACTS.PolysealEscrow, escrow.amount],
+        ...gasConfig,
+      });
+    }
   };
 
   const handleReleaseEscrow = async (escrow: EscrowRecord) => {
@@ -240,7 +293,7 @@ export function EscrowPage() {
                 <div>
                   <p className="text-sm text-surface-600 dark:text-surface-400">Active</p>
                   <p className="text-2xl font-display font-bold text-surface-900 dark:text-surface-50">
-                    {escrows.filter(e => e.state < 2).length}
+                    {escrows.filter(e => e.state >= 1 && e.state <= 2).length}
                   </p>
                 </div>
               </div>
@@ -262,7 +315,7 @@ export function EscrowPage() {
                 <div>
                   <p className="text-sm text-surface-600 dark:text-surface-400">Released</p>
                   <p className="text-2xl font-display font-bold text-surface-900 dark:text-surface-50">
-                    {escrows.filter(e => e.state === 2).length}
+                    {escrows.filter(e => e.state === 3).length}
                   </p>
                 </div>
               </div>
@@ -467,16 +520,16 @@ export function EscrowPage() {
 
             {/* Actions based on state */}
             <div className="flex gap-3 pt-4">
-              {selectedEscrow.state === 0 && selectedEscrow.buyer === address && (
+              {selectedEscrow.state === 1 && selectedEscrow.buyer === address && (
                 <Button
                   className="flex-1"
                   onClick={() => handleFundEscrow(selectedEscrow)}
                   loading={isWritePending || isConfirming}
                 >
-                  Fund Escrow
+                  {pendingDeposit ? 'Approving...' : 'Fund Escrow'}
                 </Button>
               )}
-              {selectedEscrow.state === 1 && selectedEscrow.buyer === address && (
+              {selectedEscrow.state === 2 && selectedEscrow.buyer === address && (
                 <Button
                   className="flex-1"
                   onClick={() => handleReleaseEscrow(selectedEscrow)}

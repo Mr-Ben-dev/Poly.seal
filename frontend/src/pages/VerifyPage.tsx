@@ -21,7 +21,7 @@ import {
   Input,
 } from '@/components/ui';
 import { publicClient } from '@/lib/viem';
-import { decodeFromURL, readJSONFile } from '@/lib/sharing';
+import { decodeFromURL, readJSONFile, encodeForURL } from '@/lib/sharing';
 import { truncateHash, formatUSDC, formatDate, copyToClipboard } from '@/lib/utils';
 import { CONTRACTS } from '@/config';
 import { PolysealRootBookABI } from '@/config/abis';
@@ -50,6 +50,7 @@ export function VerifyPage() {
   const [result, setResult] = useState<VerifyResult>(null);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [verifyLink, setVerifyLink] = useState('');
 
   // Check URL for shared receipt
   useEffect(() => {
@@ -74,13 +75,28 @@ export function VerifyPage() {
       const content = await readJSONFile(file);
       const parsed = JSON.parse(content as string);
       
-      // Could be single receipt or full batch
-      if (parsed.leaf && parsed.proof) {
+      // Flat format: { leaf, proof, batchId, merchant, ... }
+      if (parsed.leaf && parsed.proof && Array.isArray(parsed.proof)) {
         setReceipt(parsed);
         verifyReceipt(parsed);
+      // ReceiptJSON format: { receipt: {...}, proof: { leaf, merkleProof, ... } }
+      } else if (parsed.proof?.leaf && parsed.proof?.merkleProof) {
+        const normalized: ReceiptData = {
+          merchant: parsed.receipt?.merchant || parsed.metadata?.merchant || '0x',
+          buyer: parsed.receipt?.payer || '0x',
+          token: parsed.receipt?.token || '0x',
+          amount: parsed.receipt?.amount || '0',
+          timestamp: parsed.receipt?.issuedAt || 0,
+          invoiceId: parsed.receipt?.memo || parsed.receipt?.invoiceHash?.slice(0, 18) || '',
+          reference: parsed.receipt?.memo || '',
+          leaf: parsed.proof.leaf as `0x${string}`,
+          proof: parsed.proof.merkleProof as `0x${string}`[],
+          batchId: parseInt(parsed.proof.batchId) || 0,
+        };
+        setReceipt(normalized);
+        verifyReceipt(normalized);
       } else if (Array.isArray(parsed.receipts)) {
-        // It's a batch, let user select receipt
-        setError('Please upload a single receipt proof, not a full batch');
+        setError('Please upload a single receipt proof, not a full batch. Use the "Download Proof" button per receipt on the Create Batch page.');
       } else {
         throw new Error('Invalid format');
       }
@@ -122,11 +138,27 @@ export function VerifyPage() {
 
   const handleCopyLink = async () => {
     if (!receipt) return;
-    const url = `${window.location.origin}/verify?data=${encodeURIComponent(JSON.stringify(receipt))}`;
+    const encoded = encodeForURL(JSON.stringify(receipt));
+    const url = `${window.location.origin}/verify?data=${encoded}`;
     const success = await copyToClipboard(url);
     if (success) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const handleVerifyLink = () => {
+    if (!verifyLink.trim()) return;
+    try {
+      const url = new URL(verifyLink.trim());
+      const data = url.searchParams.get('data');
+      if (!data) throw new Error('No data parameter in URL');
+      const decoded = decodeFromURL(data);
+      const parsed = JSON.parse(decoded);
+      setReceipt(parsed);
+      verifyReceipt(parsed);
+    } catch {
+      setError('Invalid verification link. Make sure you pasted the complete URL.');
     }
   };
 
@@ -201,11 +233,21 @@ export function VerifyPage() {
                 Or paste a verification link shared by a merchant
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-3">
               <Input
                 placeholder="https://polyseal.app/verify?data=..."
                 hint="Paste the full verification URL"
+                value={verifyLink}
+                onChange={(e) => setVerifyLink(e.target.value)}
               />
+              <Button
+                className="w-full"
+                variant="secondary"
+                onClick={handleVerifyLink}
+                disabled={!verifyLink.trim()}
+              >
+                Verify Link
+              </Button>
             </CardContent>
           </Card>
 
