@@ -14,7 +14,7 @@ export const GAS_LIMITS = {
   transfer: 65_000n,
 
   // RootBook
-  commitRoot: 150_000n,
+  commitRoot: 350_000n,
 
   // Escrow
   createEscrow: 250_000n,
