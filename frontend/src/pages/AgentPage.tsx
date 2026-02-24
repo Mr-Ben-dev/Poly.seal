@@ -119,7 +119,7 @@ export function AgentPage() {
     }
   }, [isExecuteSuccess]);
 
-  async function checkEscrowAgent(escrowId: string) {
+  async function checkEscrowAgent(_escrowId: string) {
     try {
       const agentAddr = await publicClient.readContract({
         address: CONTRACTS.PolysealEscrow,
@@ -511,7 +511,7 @@ export function AgentPage() {
                     className="flex-1"
                   />
                   <Button
-                    onClick={handleCheckSettle}
+                    onClick={() => handleCheckSettle()}
                     variant="secondary"
                   >
                     Check
